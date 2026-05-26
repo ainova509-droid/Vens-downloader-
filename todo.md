@@ -56,6 +56,6 @@
 
 ## Déploiement
 
-- [ ] Créer un checkpoint final
+- [x] Créer un checkpoint final (v1.0 - 198a6f4f)
 - [ ] Publier le site sur manus.space
 - [ ] Fournir l'URL permanente à l'utilisateur
