@@ -25,4 +25,18 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+export const downloads = mysqlTable("downloads", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  videoUrl: text("videoUrl").notNull(),
+  filename: varchar("filename", { length: 255 }).notNull(),
+  s3Key: varchar("s3Key", { length: 255 }),
+  s3Url: text("s3Url"),
+  status: mysqlEnum("status", ["pending", "completed", "failed"]).default("pending").notNull(),
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt"),
+});
+
+export type Download = typeof downloads.$inferSelect;
+export type InsertDownload = typeof downloads.$inferInsert;
