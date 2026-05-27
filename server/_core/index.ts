@@ -3,11 +3,11 @@ import express from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
-import { registerStorageProxy } from "./storageProxy";
-import { appRouter } from "../routers";
-import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
+import { registerOAuthRoutes } from "./_core/oauth";
+import { registerStorageProxy } from "./_core/storageProxy"; // ⚠️ Optionnel, supprime si inutile
+import { appRouter } from "./routers";
+import { createContext } from "./_core/context";
+import { serveStatic, setupVite } from "./_core/vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -31,12 +31,16 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
+  
+  // Configure body parser (50MB pour les vidéos)
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  
+  // Routes (optionnel, supprime storageProxy si pas besoin)
   registerStorageProxy(app);
   registerOAuthRoutes(app);
-  // tRPC API
+  
+  // tRPC API - ROUTE PRINCIPALE POUR TÉLÉCHARGEMENT
   app.use(
     "/api/trpc",
     createExpressMiddleware({
@@ -44,7 +48,8 @@ async function startServer() {
       createContext,
     })
   );
-  // development mode uses Vite, production mode uses static files
+  
+  // Frontend (React)
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
@@ -59,7 +64,8 @@ async function startServer() {
   }
 
   server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
+    console.log(`✅ Vens-Downloader running on http://localhost:${port}/`);
+    console.log(`📱 API tRPC: http://localhost:${port}/api/trpc`);
   });
 }
 
